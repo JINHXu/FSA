@@ -1,0 +1,16 @@
+# Site settings
+title: Assignment 4 - Finite state automata
+subtitle: > # ignore newlines until "description:"
+    Assignment web page, winter semester 2019 - 2020
+    <a href="http://www.sfs.uni-tuebingen.de">SfS</a>,
+    <a href="http://uni-tuebingen.de/">University of Tübingen</a>
+description: > # ignore newlines until "baseurl:"
+    Assignment 4 - Finite state automata
+baseurl: ""
+url: "https://dsacl3-2019.github.io/a4"
+github_username:  dsacl3-2019
+encoding: utf-8
+future: true
+
+# Build settings
+markdown: kramdown
