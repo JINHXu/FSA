@@ -2,7 +2,12 @@
 """ Data Structures and Algorithms for CL III, Assignment 4
     See <https://dsacl3-2019.github.io/a4/> for detailed instructions.
 
-    <Please insert your name and the honor code here.>
+    Course:      Data Structures and Algorithms for CL III - WS1920
+    Assignment:  lab4, ex 01 + ex 03
+    Author:      Jinghua Xu
+    Description: an FSA class.
+ 
+    Honor Code:  I pledge that this program represents my own work.
 """
 
 import sys, random
@@ -67,7 +72,7 @@ class FSA:
     def unmark_accept(self, state):
         if state in self.accepting:
             self.accepting.remove(state)
-
+    # ???
     def toggle_accept(self, state):
         if state in self.accepting:
             self.accepting.remove(state)
@@ -189,7 +194,80 @@ class FSA:
         the automata (note that this may run forever in case of an FSA
         with cycles).
         """
-        assert True, "TODO: to be implemented"
+        string = []
+        string_counter = 0
+        
+
+        if maximum_sentences == 0:
+            maximum_sentences = float('inf')
+        
+        current_state = self.start_state
+        l = []
+        self.dfs(maximum_sentences, current_state, string, string_counter,l)
+    
+        for s in l:
+            print(s)
+    
+
+    def dfs(self, maximum_sentences, current_state, string, string_counter, l):
+        for char in self._alphabet:
+            # set of next states or None 
+            next_states = self.move(char, current_state)
+            if next_states:
+                for next_state in next_states:
+                    string.append(char)
+                    if next_state in self.accepting:
+                        if string_counter < maximum_sentences:
+                            s = ''.join(string)
+                            print(s)
+                            l.append(s)
+                            # yield from l
+                            # yield ''.join(string)
+                            string_counter +=1
+                
+                    self.dfs(maximum_sentences, next_state, string, string_counter,l)
+                    string.pop()
+
+
+    '''
+    initial idea
+
+
+
+    for acc in self.accepting:
+        self.construct_all_strings(self.start_state, acc, maximum_sentences)
+
+    
+    def construct_all_strings(self, start_state, acc_state, visited, string, maximum_sentences):
+        """
+        A helper function of generate(), yields the strings accepted by this FSA.
+        Parameters
+        ----------
+        """
+        visited[u] = True
+        string.append(start_state)
+
+        if start_state == acc_state:
+
+            s = ''.join(string)
+            print(s)
+            yield s
+        
+        else:
+            for i in 
+
+
+        
+        
+        
+    # other strtegy: run dfs from one node to another and reconstruct
+        
+    '''
+
+
+
+        
+        
 
     def minimize(self, verbose=False):
         """ E4.3: Minimize the automaton.
@@ -199,3 +277,18 @@ class FSA:
         """
         assert True, "TODO: to be implemented"
 
+def main():
+    m = FSA()
+    m.add_arc(0,'w',1)
+    m.add_arc(0,'u', 0)
+    m.add_arc(1,'a',2)
+    m.add_arc(2,'l',3)
+    m.add_arc(3,'k',4)
+    m.mark_accept(4)
+    s = m.add_arc(0,'c')
+    m.mark_accept(5)
+    m.write_att()
+    m.generate()
+
+if __name__== "__main__":
+  main()

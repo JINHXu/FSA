@@ -1,0 +1,8 @@
+walks
+walls
+wants
+works
+walk
+wall
+want
+work
