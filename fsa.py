@@ -10,7 +10,9 @@
     Honor Code:  I pledge that this program represents my own work.
 """
 
-import sys, random
+import sys
+import random
+
 
 class FSA:
     """ A class representing finite state automata.
@@ -28,6 +30,7 @@ class FSA:
         accepting: the set of accepting states
         is_deterministic (boolean): whether the FSA is deterministic or not
     """
+
     def __init__(self, deterministic=True):
         self._reset(deterministic)
 
@@ -41,7 +44,7 @@ class FSA:
 
     def add_arc(self, s1, sym, s2=None, accepting=False):
         """ Add an arc from state s1 to s2 with symbol.
-        
+
         If s2 is not specified, the method creates a new state.
         The return value is s2.
 
@@ -54,7 +57,8 @@ class FSA:
             self._states.add(s1)
         if s2 is None:
             s2 = len(self._states)
-            while s2 in self._states: s2 += 1
+            while s2 in self._states:
+                s2 += 1
         self._states.add(s2)
         self._alphabet.add(sym)
         if (s1, sym) not in self.transitions:
@@ -65,7 +69,7 @@ class FSA:
         if len(self.transitions[(s1, sym)]) > 1:
             self.deterministic = False
         return s2
-    
+
     def mark_accept(self, state):
         self.accepting.add(state)
 
@@ -73,6 +77,7 @@ class FSA:
         if state in self.accepting:
             self.accepting.remove(state)
     # ???
+
     def toggle_accept(self, state):
         if state in self.accepting:
             self.accepting.remove(state)
@@ -85,7 +90,8 @@ class FSA:
     def move(self, sym, s1=None):
         """ Return the state(s) reachable from 's1' on 'symbol'
         """
-        if s1 is None: s1 = self.start_state
+        if s1 is None:
+            s1 = self.start_state
         if (s1, sym) not in self.transitions:
             return None
         else:
@@ -112,7 +118,7 @@ class FSA:
         agenda = []
         state = self.start_state
         inp_pos = 0
-        for node in self.transitions.get((self.start_state,s[inp_pos]), []):
+        for node in self.transitions.get((self.start_state, s[inp_pos]), []):
             agenda.append((node, inp_pos + 1))
         while agenda:
             node, inp_pos = agenda.pop()
@@ -120,10 +126,9 @@ class FSA:
                 if node in self.accepting:
                     return True
             else:
-                for node in self.transitions.get((node,s[inp_pos]), []):
+                for node in self.transitions.get((node, s[inp_pos]), []):
                     agenda.append((node, inp_pos + 1))
         return False
-
 
     def recognize(self, s):
         """ Recognize the given string 's', return a boolean value
@@ -160,7 +165,7 @@ class FSA:
             if (self.start_state, sym) in self.transitions:
                 for s2 in self.transitions[(self.start_state, sym)]:
                     print(fmt_transition.format(self.start_state, s2, sym),
-                        file=fp)
+                          file=fp)
         for s1, sym in self.transitions:
             if s1 != self.start_state:
                 for s2 in self.transitions[(s1, sym)]:
@@ -176,14 +181,13 @@ class FSA:
         """ Build a string that contains the 'dot' representation
         of the graph, and write to 'filename', or standard output
         if not specified.
-        
+
         You may use this function to visualize your results and
         visualize the changes you perform on the FSA.
         The functionality is implemented in write_att(),
         this method is just a wrapper.
         """
         self.write_att(filename, dot=True)
-
 
     def generate(self, maximum_sentences=0):
         """ E4.1: Generate all string accepted by the automaton.
@@ -196,43 +200,48 @@ class FSA:
         """
         string = []
         string_counter = 0
-        
 
         if maximum_sentences == 0:
             maximum_sentences = float('inf')
-        
+
         current_state = self.start_state
         l = []
-        self.dfs(maximum_sentences, current_state, string, string_counter,l)
-    
-        for s in l:
+        sentences_counter = 0
+        while sentences_counter < maximum_sentences:
+            s = next(self.dfs(maximum_sentences, current_state, string, string_counter, l))
             print(s)
-    
+            sentences_counter += 1
+            
+        '''
+        c = 0
+        for s in l:
+            if c < maximum_sentences:
+                print(s)
+                # yield s
+                c += 1
+                '''
 
     def dfs(self, maximum_sentences, current_state, string, string_counter, l):
         for char in self._alphabet:
-            # set of next states or None 
+            # set of next states or None
             next_states = self.move(char, current_state)
             if next_states:
                 for next_state in next_states:
                     string.append(char)
                     if next_state in self.accepting:
-                        if string_counter < maximum_sentences:
+                        if string_counter >= maximum_sentences:
+                            return
+                        else:
                             s = ''.join(string)
-                            print(s)
                             l.append(s)
-                            # yield from l
-                            # yield ''.join(string)
-                            string_counter +=1
-                
-                    self.dfs(maximum_sentences, next_state, string, string_counter,l)
+                            yield s
+                            string_counter += 1
+                    if string_counter < maximum_sentences:
+                        self.dfs(maximum_sentences, next_state, string, string_counter, l)
                     string.pop()
-
 
     '''
     initial idea
-
-
 
     for acc in self.accepting:
         self.construct_all_strings(self.start_state, acc, maximum_sentences)
@@ -255,19 +264,11 @@ class FSA:
         
         else:
             for i in 
-
-
-        
-        
+   
         
     # other strtegy: run dfs from one node to another and reconstruct
         
     '''
-
-
-
-        
-        
 
     def minimize(self, verbose=False):
         """ E4.3: Minimize the automaton.
@@ -277,18 +278,21 @@ class FSA:
         """
         assert True, "TODO: to be implemented"
 
+
 def main():
     m = FSA()
-    m.add_arc(0,'w',1)
-    m.add_arc(0,'u', 0)
-    m.add_arc(1,'a',2)
-    m.add_arc(2,'l',3)
-    m.add_arc(3,'k',4)
+    m.add_arc(0, 'w', 1)
+    m.add_arc(0, 'u', 0)
+    m.add_arc(1, 'a', 2)
+    m.add_arc(2, 'l', 3)
+    m.add_arc(3, 'k', 4)
     m.mark_accept(4)
-    s = m.add_arc(0,'c')
+    s = m.add_arc(0, 'c')
     m.mark_accept(5)
     m.write_att()
-    m.generate()
+    m.generate(maximum_sentences=5)
+    
 
-if __name__== "__main__":
-  main()
+
+if __name__ == "__main__":
+    main()
