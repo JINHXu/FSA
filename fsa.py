@@ -198,77 +198,30 @@ class FSA:
         the automata (note that this may run forever in case of an FSA
         with cycles).
         """
-        string = []
-        string_counter = 0
 
         if maximum_sentences == 0:
             maximum_sentences = float('inf')
 
         current_state = self.start_state
-        l = []
-        sentences_counter = 0
-        while sentences_counter < maximum_sentences:
-            s = next(self.dfs(maximum_sentences, current_state, string, string_counter, l))
-            print(s)
-            sentences_counter += 1
-            
-        '''
-        c = 0
-        for s in l:
-            if c < maximum_sentences:
-                print(s)
-                # yield s
-                c += 1
-                '''
+        for index, sentence in enumerate(self.dfs(current_state), 1):
+            print(sentence)
+            if index == maximum_sentences:
+                return
 
-    def dfs(self, maximum_sentences, current_state, string, string_counter, l):
-        for char in self._alphabet:
-            # set of next states or None
-            next_states = self.move(char, current_state)
-            if next_states:
+    def dfs(self, current_state):
+        stack = [(current_state, [])]
+        while stack:
+            current_state, string = stack.pop()
+            for char in self._alphabet:
+                next_states = self.move(char, current_state)
+                if not next_states:
+                    continue
+
                 for next_state in next_states:
-                    string.append(char)
                     if next_state in self.accepting:
-                        if string_counter >= maximum_sentences:
-                            return
-                        else:
-                            s = ''.join(string)
-                            l.append(s)
-                            yield s
-                            string_counter += 1
-                    if string_counter < maximum_sentences:
-                        self.dfs(maximum_sentences, next_state, string, string_counter, l)
-                    string.pop()
+                        yield ''.join(string) + char
 
-    '''
-    initial idea
-
-    for acc in self.accepting:
-        self.construct_all_strings(self.start_state, acc, maximum_sentences)
-
-    
-    def construct_all_strings(self, start_state, acc_state, visited, string, maximum_sentences):
-        """
-        A helper function of generate(), yields the strings accepted by this FSA.
-        Parameters
-        ----------
-        """
-        visited[u] = True
-        string.append(start_state)
-
-        if start_state == acc_state:
-
-            s = ''.join(string)
-            print(s)
-            yield s
-        
-        else:
-            for i in 
-   
-        
-    # other strtegy: run dfs from one node to another and reconstruct
-        
-    '''
+                    stack.append((next_state, string + [char]))
 
     def minimize(self, verbose=False):
         """ E4.3: Minimize the automaton.
@@ -283,15 +236,13 @@ def main():
     m = FSA()
     m.add_arc(0, 'w', 1)
     m.add_arc(0, 'u', 0)
-    m.add_arc(1, 'a', 2)
-    m.add_arc(2, 'l', 3)
-    m.add_arc(3, 'k', 4)
-    m.mark_accept(4)
-    s = m.add_arc(0, 'c')
-    m.mark_accept(5)
+    a = m.add_arc(1, 'a')
+    l = m.add_arc(a, 'l')
+    k = m.add_arc(l, 'k')
+    m.mark_accept(k)
+
     m.write_att()
-    m.generate(maximum_sentences=5)
-    
+    m.generate(maximum_sentences=3)
 
 
 if __name__ == "__main__":
