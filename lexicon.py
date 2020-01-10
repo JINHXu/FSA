@@ -12,6 +12,7 @@
 import argparse
 from fsa import FSA
 
+
 def insert_words(fsa, words):
     """ E4.2: Insert given words to a finite-state automaton.
 
@@ -22,34 +23,38 @@ def insert_words(fsa, words):
     words : set
          A set of words to be inserted to fsa.
     """
-    # states are represented as ints
-    # symbols ... strings
-    state = 0
+    # initialization
+    fsa.start_state = 0
     for word in words:
+        current_state = fsa.start_state
         for symbol in word:
-            if symbol in fsa._alphabet:
-                # !!!
-                continue
-            else:
-                # last symbol in word
-                if symbol == word[-1]:
-                    accepting = True
-                else:
-                    accepting = False
-                next_state = fsa.add_arc(state, symbol, None, accepting)
-                state = next_state
+            fsa._alphabet.add(symbol)
+            found_in_next_states = False
+            # for the possible next states
+            next_states = fsa.move(symbol, current_state)
+            if next_states is not None:
+                for next_state in next_states:
+                    found_in_next_states = True
+                    current_state = next_state
+                    break
+            if not found_in_next_states:
+                # new state
+                fsa.add_arc(current_state, symbol, s2=len(fsa._states)+1)
+                current_state = len(fsa._states)
+
+        fsa.mark_accept(current_state)
+        fsa.unmark_accept(0)
 
 
 if __name__ == '__main__':
     argp = argparse.ArgumentParser()
     argp.add_argument('input', help="Input file containing a word list.")
     argp.add_argument('--compact', action='store_true',
-            help="Compact the lexicon by minimizing the FSA.")
+                      help="Compact the lexicon by minimizing the FSA.")
     argp.add_argument('--test', action='store_true',
-            help=("Test the lexicon by comparing the words read from "
-                  "the file and the words generated from the FSA."))
+                      help=("Test the lexicon by comparing the words read from "
+                            "the file and the words generated from the FSA."))
     args = argp.parse_args()
-
 
     words = set()
     with open(args.input, 'rt') as fp:
@@ -59,9 +64,8 @@ if __name__ == '__main__':
     m = FSA()
     insert_words(m, words)
     m.write_att()
-    
 
-'''
+    '''
     if args.compact:
         m.minimize()
 
