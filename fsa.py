@@ -12,6 +12,7 @@
 
 import sys
 import random
+import math
 
 
 class FSA:
@@ -229,7 +230,51 @@ class FSA:
         If verbose=True, print out the number of states and arcs
         before and after the minimization.
         """
-        assert True, "TODO: to be implemented"
+
+        '''Create a state-by-statetable,mark distinguishable pairs: (q1, q2) 
+        such that (∆(q1, x), ∆(q2, x)) is a distinguishable pair for any x ∈ Σ'''
+        indistinguishable_pairs = []
+        num_states = len(self._states)
+        for state1 in range(num_states):
+            for state2 in range(1, num_states+1):
+                if state1 >= state2:
+                    continue
+                indistinguishable = True
+                for sym in self._alphabet:
+                    n1 = self.move(sym, state1)
+                    n2 = self.move(sym, state2)
+                    if n1 is not None and n2 is not None:
+                        # since we are dealing with DFA
+                        next1 = n1.pop()
+                        next2 = n2.pop()
+                        # distinguishable
+                        if next1 != next2 and next1 != state2 and next2 != state1:
+                            indistinguishable = False
+                        
+                if indistinguishable:
+                    indistinguishable_pairs.append((state1, state2))
+            
+
+        '''Merge indistinguishable states'''
+        for indistinguishable_pair in indistinguishable_pairs:
+            # unpack state
+            state1, state2 = indistinguishable_pair
+
+            num_digits = int(math.log10(state2))+1
+            state2 = state2 * pow(10, -num_digits)
+            # merged state will be represented as s1.s2
+            merged_state = state1 + state2
+
+            # in the case of trie, there will only be at most one transition goes to/from a state
+
+            # transition goes to s1
+            # transition goes from s1
+        
+            # transition goes to s2
+            # transition goes from s2
+
+
+
 
 
 def main():
