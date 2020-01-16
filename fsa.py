@@ -231,8 +231,88 @@ class FSA:
         before and after the minimization.
         """
 
-        '''Create a state-by-statetable,mark distinguishable pairs: (q1, q2) 
+        '''Create a state-by-state table,mark distinguishable pairs: (q1, q2) 
         such that (∆(q1, x), ∆(q2, x)) is a distinguishable pair for any x ∈ Σ'''
+
+        distinguishable_pairs = set()
+
+        num_states = len(self._states) +1
+
+        # initialization: acc states are firstly partinioned
+        for state1 in range(num_states-1):
+            for state2 in range(1, num_states):
+                if state1 < state2:  
+                    if state2 in self.accepting and state1 not in self.accepting:
+                        distinguishable_pairs.add((state1, state2)) 
+        
+        # loop termination marker
+        just_updated = True
+
+        # the loop will terminate when there is no further update during each traversal of the state-by-state table
+        while just_updated:
+            just_updated = False
+            # traverse the state-by-state table
+            for state1 in range(num_states-1):
+                for state2 in range(1, num_states):
+                    if state1 < state2: 
+                        if (state1, state2) not in distinguishable_pairs:
+                            for sym in self._alphabet:
+                                # in the case we are expected to deal with, there can be at most one next move
+                                next1 = self.move(sym, state1)
+                                next2 = self.move(sym, state2)
+                                if next1 and next2:
+                                    # pop the only one element in set of next moves(DFA feature)
+                                    n1 = next1.pop()
+                                    n2 = next2.pop()
+
+                                    # make sure n1 is smaller than n2
+                                    if n1 >= n2:
+                                        tmp = n1
+                                        n1 = n2
+                                        n2 = tmp
+
+                                    if (n1, n2) in distinguishable_pairs:
+                                        distinguishable_pairs.add((state1, state2))
+                                        just_updated = True
+                            if not just_updated:
+                                distinguishable_pairs.add((state1, state2))
+                                        
+        
+        indisdinguishable_pairs = set()
+        for state1 in range(num_states-1):
+            for state2 in range(1, num_states):
+                if state1 < state2:
+                    if (state1, state2) not in distinguishable_pairs:
+                        indisdinguishable_pairs.add((state1, state2))
+                        print((state1, state2))
+        print(len(indisdinguishable_pairs))
+        print(len(distinguishable_pairs))
+
+
+        '''
+        
+        # merge
+        for indistinguishable_pair in indistinguishable_pairs:
+            # unpack state
+            state1, state2 = indistinguishable_pair
+
+            num_digits = int(math.log10(state2))+1
+            state2 = state2 * pow(10, -num_digits)
+            # merged state will be represented as s1.s2
+            merged_state = state1 + state2
+
+            # in the case of trie, there will only be at most one transition goes to/from a state
+
+            # transition goes to s1
+            # transition goes from s1
+        
+            # transition goes to s2
+            # transition goes from s2
+
+
+        '''
+
+        '''
         indistinguishable_pairs = []
         num_states = len(self._states)
         for state1 in range(num_states):
@@ -255,7 +335,7 @@ class FSA:
                     indistinguishable_pairs.append((state1, state2))
             
 
-        '''Merge indistinguishable states'''
+        # Merge indistinguishable states
         for indistinguishable_pair in indistinguishable_pairs:
             # unpack state
             state1, state2 = indistinguishable_pair
@@ -271,10 +351,7 @@ class FSA:
             # transition goes from s1
         
             # transition goes to s2
-            # transition goes from s2
-
-
-
+            # transition goes from s2'''
 
 
 def main():

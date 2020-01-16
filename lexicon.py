@@ -64,6 +64,7 @@ if __name__ == '__main__':
     m = FSA()
     insert_words(m, words)
     m.write_att()
+    m.minimize()
 
     '''
     if args.compact:
