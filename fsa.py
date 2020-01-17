@@ -234,18 +234,20 @@ class FSA:
         '''Create a state-by-state table,mark distinguishable pairs: (q1, q2) 
         such that (∆(q1, x), ∆(q2, x)) is a distinguishable pair for any x ∈ Σ'''
 
+        self.to_dot("graph.dot")
         distinguishable_pairs = set()
 
-        num_states = len(self._states) +1
+        num_states = len(self._states) + 1
 
         # initialization: acc states are firstly partinioned
         for state1 in range(num_states-1):
             for state2 in range(1, num_states):
-                if state1 < state2:  
-                    if state2 in self.accepting and state1 not in self.accepting:
+                if state1 < state2:
+                    print("Pair:", state1, state2)
+                    if (state2 in self.accepting) != (state1 in self.accepting):
                         distinguishable_pairs.add((state1, state2)) 
                         # tmp
-                        print((state1, state2))
+                        # print((state1, state2))
         
         # loop termination marker
         just_updated = True
@@ -254,45 +256,56 @@ class FSA:
         while just_updated:
             just_updated = False
             # traverse the state-by-state table
-            for state1 in range(num_states-1):
-                for state2 in range(1, num_states):
-                    if state1 < state2: 
-                        if (state1, state2) not in distinguishable_pairs:
-                            '''mutual_goto = False'''
-                            for sym in self._alphabet:
-                                # in the case we are expected to deal with, there can be at most one next move
-                                next1 = self.move(sym, state1)
-                                next2 = self.move(sym, state2)
-                                if next1 and next2:
-                                    '''mutual_goto = True'''
-                                    # pop the only one element in set of next moves(DFA feature)
-                                    n1 = next1.pop()
-                                    n2 = next2.pop()
-                                    
-                                    # make sure n1 is smaller than n2
-                                    '''if n1 >= n2:
-                                        tmp = n1
-                                        n1 = n2
-                                        n2 = tmp'''
-
-                                    if (n1, n2) in distinguishable_pairs:
-                                        distinguishable_pairs.add((state1, state2))
-                                        # tmp
-                                        print((state1, state2))
-                                        just_updated = True
-                            '''
-                            if not mutual_goto:
-                                distinguishable_pairs.add((state1, state2))'''
-                                        
+            for state1 in range(num_states - 1):
+                for state2 in range(1, state1 + 2):
+                    if (state1, state2) not in distinguishable_pairs:
+                        '''mutual_goto = False'''
+                        for sym in self._alphabet:
+                            # in the case we are expected to deal with, there can be at most one next move
+                            next1 = self.move(sym, state1)
+                            next2 = self.move(sym, state2)
+                            if next1 and next2:
+                                '''mutual_goto = True'''
+                                # pop the only one element in set of next moves(DFA feature)
+                                n1 = next(iter(next1))
+                                n2 = next(iter(next2))
+                                
+                                # make sure n1 is smaller than n2
+                                '''if n1 >= n2:
+                                    tmp = n1
+                                    n1 = n2
+                                    n2 = tmp'''
+                
+                                if (n1, n2) in distinguishable_pairs:
+                                    distinguishable_pairs.add((state1, state2))
+                                    # tmp
+                                    print("D:", (state1, state2))
+                                    just_updated = True
+                        '''
+                        if not mutual_goto:
+                            distinguishable_pairs.add((state1, state2))'''
+        print(distinguishable_pairs)                                
         # test this part before merge
         indisdinguishable_pairs = set()
         for state1 in range(num_states-1):
             for state2 in range(1, num_states):
-                if state1 < state2:
-                    if (state1, state2) not in distinguishable_pairs:
-                        indisdinguishable_pairs.add((state1, state2))
-                        # print((state1, state2))
+                if state1 < state2 and (state1, state2) not in distinguishable_pairs:
+                    indisdinguishable_pairs.add((state1, state2))
+                    # print((state1, state2))
         print(len(indisdinguishable_pairs))
+        print(indisdinguishable_pairs)
+        merged_states = set()
+        for (a, b) in indisdinguishable_pairs:
+            merged_states.add(a)
+            merged_states.add(b)
+
+        different_states = set()
+        for (a, b) in distinguishable_pairs:
+            different_states.add(a)
+            different_states.add(b)
+
+        print(merged_states)
+        print(different_states)
         print(len(distinguishable_pairs))
 
 
