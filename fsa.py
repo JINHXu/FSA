@@ -77,7 +77,6 @@ class FSA:
     def unmark_accept(self, state):
         if state in self.accepting:
             self.accepting.remove(state)
-    # ???
 
     def toggle_accept(self, state):
         if state in self.accepting:
@@ -205,7 +204,7 @@ class FSA:
 
         current_state = self.start_state
         for index, sentence in enumerate(self.dfs(current_state), 1):
-            print(sentence)
+            # print(sentence)
             if index == maximum_sentences:
                 return
 
@@ -237,17 +236,15 @@ class FSA:
         self.to_dot("graph.dot")
         distinguishable_pairs = set()
 
+        # len(self._states) is one smaller
         num_states = len(self._states) + 1
 
         # initialization: acc states are firstly partinioned
         for state1 in range(num_states-1):
-            for state2 in range(1, num_states):
+            for state2 in range(state1+1, num_states):
                 if state1 < state2:
-                    print("Pair:", state1, state2)
                     if (state2 in self.accepting) != (state1 in self.accepting):
                         distinguishable_pairs.add((state1, state2)) 
-                        # tmp
-                        # print((state1, state2))
         
         # loop termination marker
         just_updated = True
@@ -257,115 +254,111 @@ class FSA:
             just_updated = False
             # traverse the state-by-state table
             for state1 in range(num_states - 1):
-                for state2 in range(1, state1 + 2):
+                for state2 in range(state1+1, num_states):
                     if (state1, state2) not in distinguishable_pairs:
-                        '''mutual_goto = False'''
                         for sym in self._alphabet:
                             # in the case we are expected to deal with, there can be at most one next move
                             next1 = self.move(sym, state1)
                             next2 = self.move(sym, state2)
                             if next1 and next2:
-                                '''mutual_goto = True'''
-                                # pop the only one element in set of next moves(DFA feature)
+                                # the only one element in set of next moves(DFA feature)
                                 n1 = next(iter(next1))
                                 n2 = next(iter(next2))
-                                
-                                # make sure n1 is smaller than n2
-                                '''if n1 >= n2:
-                                    tmp = n1
-                                    n1 = n2
-                                    n2 = tmp'''
                 
                                 if (n1, n2) in distinguishable_pairs:
                                     distinguishable_pairs.add((state1, state2))
-                                    # tmp
-                                    print("D:", (state1, state2))
                                     just_updated = True
-                        '''
-                        if not mutual_goto:
-                            distinguishable_pairs.add((state1, state2))'''
-        print(distinguishable_pairs)                                
-        # test this part before merge
+                        
+                            elif (next1 is None and next2 is not None) or (next2 is None and next1 is not None):
+                                distinguishable_pairs.add((state1, state2))
+
         indisdinguishable_pairs = set()
         for state1 in range(num_states-1):
             for state2 in range(1, num_states):
                 if state1 < state2 and (state1, state2) not in distinguishable_pairs:
                     indisdinguishable_pairs.add((state1, state2))
-                    # print((state1, state2))
-        print(len(indisdinguishable_pairs))
-        print(indisdinguishable_pairs)
-        merged_states = set()
-        for (a, b) in indisdinguishable_pairs:
-            merged_states.add(a)
-            merged_states.add(b)
-
-        different_states = set()
-        for (a, b) in distinguishable_pairs:
-            different_states.add(a)
-            different_states.add(b)
-
-        print(merged_states)
-        print(different_states)
-        print(len(distinguishable_pairs))
-
-
-        '''
         
-        # merge
-        for indistinguishable_pair in indistinguishable_pairs:
-            # unpack state
-            state1, state2 = indistinguishable_pair
+        # merge pair by pair
+        while indisdinguishable_pairs:
+            indisdinguishable_pair = indisdinguishable_pairs.pop()
+            state1, state2 = indisdinguishable_pair
 
-            num_digits = int(math.log10(state2))+1
-            state2 = state2 * pow(10, -num_digits)
-            # merged state will be represented as s1.s2
-            merged_state = state1 + state2
+            # to make sure the merged state is unique(no name collision with other states)
+            merged_state = state1
 
-            # in the case of trie, there will only be at most one transition goes to/from a state
+            # update states in fsa: replace all state2 with state1
+            for key, value in self.transitions.items():
 
-            # transition goes to s1
-            # transition goes from s1
+                # transition where state2 is a target state
+                if value == state2:
+                    self.transitions[key] = merged_state
+
+                # transition where state2 is the origin state
+                if key[0] == state2:
+                    self.transitions[(merged_state, key[1])] = value
+                    del self.transitions[key]
+   
+            # update states in indistinguishable pairs
+            for pair in indisdinguishable_pairs:
+                if pair[0] == state2:
+                    indisdinguishable_pairs.add((merged_state, pair[1]))
+                    indisdinguishable_pairs.remove(pair)
+                elif pair[1] == state2:
+                    indisdinguishable_pairs.add((pair[0], merged_state))
+                    indisdinguishable_pairs.remove((pair))
+                    
+        self.to_dot("minimized.dot")
+
+
+
+
+
+
+
+
+
+
+
         
-            # transition goes to s2
-            # transition goes from s2
+
+
+
+
+
+
+
+
 
 
         '''
+        # recombine the pairs into sets, each set represents a combined state 
 
-        '''
-        indistinguishable_pairs = []
-        num_states = len(self._states)
-        for state1 in range(num_states):
-            for state2 in range(1, num_states+1):
-                if state1 >= state2:
-                    continue
-                indistinguishable = True
-                for sym in self._alphabet:
-                    n1 = self.move(sym, state1)
-                    n2 = self.move(sym, state2)
-                    if n1 is not None and n2 is not None:
-                        # since we are dealing with DFA
-                        next1 = n1.pop()
-                        next2 = n2.pop()
-                        # distinguishable
-                        if next1 != next2 and next1 != state2 and next2 != state1:
-                            indistinguishable = False
-                        
-                if indistinguishable:
-                    indistinguishable_pairs.append((state1, state2))
+        # turn set into a dict
+        indisdinguishable_pairs_dict = dict()
+        for indisdinguishable_pair in indisdinguishable_pairs:
+            state1, state2 = indisdinguishable_pair
+            indisdinguishable_pairs_dict[state1] = state2
+        
+        for indisdinguishable_pair in indisdinguishable_pairs:'''
             
 
-        # Merge indistinguishable states
-        for indistinguishable_pair in indistinguishable_pairs:
-            # unpack state
+
+
+        
+
+        '''
+        # state number of the first merged state
+        merged_state = num_states 
+        
+        
+        # merge
+        for indistinguishable_pair in indisdinguishable_pairs:
+            # unpack indistinguishable pair
             state1, state2 = indistinguishable_pair
 
-            num_digits = int(math.log10(state2))+1
-            state2 = state2 * pow(10, -num_digits)
-            # merged state will be represented as s1.s2
-            merged_state = state1 + state2
+            merged_state = 
 
-            # in the case of trie, there will only be at most one transition goes to/from a state
+            # in the case of a trie, there will only be at most one transition goes to/from a state
 
             # transition goes to s1
             # transition goes from s1
@@ -374,6 +367,9 @@ class FSA:
             # transition goes from s2'''
 
 
+
+
+'''
 def main():
     m = FSA()
     m.add_arc(0, 'w', 1)
@@ -389,3 +385,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
