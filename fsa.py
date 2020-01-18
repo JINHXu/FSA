@@ -279,14 +279,15 @@ class FSA:
             for state2 in range(1, num_states):
                 if state1 < state2 and (state1, state2) not in distinguishable_pairs:
                     indisdinguishable_pairs.add((state1, state2))
-        
+
         # merge pair by pair
         while indisdinguishable_pairs:
             indisdinguishable_pair = indisdinguishable_pairs.pop()
+
             state1, state2 = indisdinguishable_pair
 
             # to make sure the merged state is unique(no name collision with other states)
-            merged_state = state1
+            merged_state = state1 
 
             # update states in fsa: replace all state2 with state1
             for key, value in self.transitions.items():
@@ -298,19 +299,20 @@ class FSA:
             # transition where state2 is the origin state
             for sym in self._alphabet:
                 next_move = self.move(sym, state2)
-                if next_move is not None:
-                    new_state = next_move.pop()
-                    self.transitions[(merged_state, sym)] = new_state
+                if next_move:
+                    self.transitions[(merged_state, sym)] = next_move
                     del self.transitions[(state2, sym)]
-   
+            
+            indisdinguishable_pairs_copy = indisdinguishable_pairs.copy()
             # update states in indistinguishable pairs
-            for pair in indisdinguishable_pairs:
+            for pair in indisdinguishable_pairs_copy:
                 if pair[0] == state2:
                     indisdinguishable_pairs.add((merged_state, pair[1]))
                     indisdinguishable_pairs.remove(pair)
                 elif pair[1] == state2:
                     indisdinguishable_pairs.add((pair[0], merged_state))
                     indisdinguishable_pairs.remove(pair)
+            
 
         # tmp          
         self.to_dot("minimized.dot")
