@@ -233,7 +233,9 @@ class FSA:
         '''Create a state-by-state table,mark distinguishable pairs: (q1, q2) 
         such that (∆(q1, x), ∆(q2, x)) is a distinguishable pair for any x ∈ Σ'''
 
+        # tmp
         self.to_dot("graph.dot")
+
         distinguishable_pairs = set()
 
         # len(self._states) is one smaller
@@ -293,10 +295,13 @@ class FSA:
                 if value == state2:
                     self.transitions[key] = merged_state
 
-                # transition where state2 is the origin state
-                if key[0] == state2:
-                    self.transitions[(merged_state, key[1])] = value
-                    del self.transitions[key]
+            # transition where state2 is the origin state
+            for sym in self._alphabet:
+                next_move = self.move(sym, state2)
+                if next_move is not None:
+                    new_state = next_move.pop()
+                    self.transitions[(merged_state, sym)] = new_state
+                    del self.transitions[(state2, sym)]
    
             # update states in indistinguishable pairs
             for pair in indisdinguishable_pairs:
@@ -305,8 +310,9 @@ class FSA:
                     indisdinguishable_pairs.remove(pair)
                 elif pair[1] == state2:
                     indisdinguishable_pairs.add((pair[0], merged_state))
-                    indisdinguishable_pairs.remove((pair))
-                    
+                    indisdinguishable_pairs.remove(pair)
+
+        # tmp          
         self.to_dot("minimized.dot")
 
 
