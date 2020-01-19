@@ -203,11 +203,19 @@ class FSA:
             maximum_sentences = float('inf')
 
         current_state = self.start_state
-        for index, sentence in enumerate(self.dfs(current_state), 1):
+        for index, word in enumerate(self.dfs(current_state), 1):
+            yield word
             if index == maximum_sentences:
                 return
 
     def dfs(self, current_state):
+        """
+        A helper function of generate. Search the FSA in depth-first manner.
+        Parameter
+        ----------
+        current_state : int
+                The current state(a state in FSA) of the search.
+        """
         stack = [(current_state, [])]
         while stack:
             current_state, string = stack.pop()
@@ -232,12 +240,9 @@ class FSA:
         '''Create a state-by-state table,mark distinguishable pairs: (q1, q2) 
         such that (∆(q1, x), ∆(q2, x)) is a distinguishable pair for any x ∈ Σ'''
 
-        # tmp
-        self.to_dot("graph.dot")
-
         distinguishable_pairs = set()
 
-        # len(self._states) is one smaller
+        # len(self._states) is one smaller, because start state is not in the set of states(on purpose)
         num_states = len(self._states) + 1
 
         # initialization: acc states are firstly partinioned
@@ -321,6 +326,15 @@ class FSA:
             for pair in new_indisdinguishable_pairs_copy:
                 if pair[0] == pair[1]:
                     indisdinguishable_pairs.remove(pair)
+
         '''delete disconnected states'''
-        # tmp
-        self.to_dot("minimized.dot")
+        connected_states = set()
+        for target_states in self.transitions.values():
+            connected_states.update(target_states)
+
+        states_copy = self._states.copy()
+        for state in states_copy:
+            if state not in connected_states:
+                self._states.remove(state)
+                if state in self.accepting:
+                    self.accepting.remove(state)

@@ -63,10 +63,7 @@ if __name__ == '__main__':
 
     m = FSA()
     insert_words(m, words)
-    m.write_att()
-    m.minimize()
 
-    '''
     if args.compact:
         m.minimize()
 
@@ -77,4 +74,3 @@ if __name__ == '__main__':
         if words != words_fsa:
             print("Test failed. {} missed, {} extra".format(
                 len(words - words_fsa), len(words_fsa, words)))
-'''
