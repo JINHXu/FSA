@@ -327,7 +327,7 @@ class FSA:
                 if pair[0] == pair[1]:
                     indisdinguishable_pairs.remove(pair)
 
-        '''delete disconnected states'''
+        # delete disconnected states
         connected_states = set()
         for target_states in self.transitions.values():
             connected_states.update(target_states)
