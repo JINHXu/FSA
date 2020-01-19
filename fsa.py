@@ -204,7 +204,6 @@ class FSA:
 
         current_state = self.start_state
         for index, sentence in enumerate(self.dfs(current_state), 1):
-            # print(sentence)
             if index == maximum_sentences:
                 return
 
@@ -246,8 +245,8 @@ class FSA:
             for state2 in range(state1+1, num_states):
                 if state1 < state2:
                     if (state2 in self.accepting) != (state1 in self.accepting):
-                        distinguishable_pairs.add((state1, state2)) 
-        
+                        distinguishable_pairs.add((state1, state2))
+
         # loop termination marker
         just_updated = True
 
@@ -266,11 +265,11 @@ class FSA:
                                 # the only one element in set of next moves(DFA feature)
                                 n1 = next(iter(next1))
                                 n2 = next(iter(next2))
-                
+
                                 if (n1, n2) in distinguishable_pairs:
                                     distinguishable_pairs.add((state1, state2))
                                     just_updated = True
-                        
+
                             elif (next1 is None and next2 is not None) or (next2 is None and next1 is not None):
                                 distinguishable_pairs.add((state1, state2))
 
@@ -287,22 +286,27 @@ class FSA:
             state1, state2 = indisdinguishable_pair
 
             # to make sure the merged state is unique(no name collision with other states)
-            merged_state = state1 
+            merged_state = state1
 
             # update states in fsa: replace all state2 with state1
             for key, value in self.transitions.items():
-
                 # transition where state2 is a target state
-                if value == state2:
-                    self.transitions[key] = merged_state
+                if state2 in value:
+
+                    self.transitions[key].add(merged_state)
+
+                    self.transitions[key].remove(state2)
 
             # transition where state2 is the origin state
             for sym in self._alphabet:
                 next_move = self.move(sym, state2)
                 if next_move:
-                    self.transitions[(merged_state, sym)] = next_move
+                    if (merged_state, sym) in self.transitions.keys():
+                        self.transitions[(merged_state, sym)].update(next_move)
+                    else:
+                        self.transitions[(merged_state, sym)] = next_move
                     del self.transitions[(state2, sym)]
-            
+
             indisdinguishable_pairs_copy = indisdinguishable_pairs.copy()
             # update states in indistinguishable pairs
             for pair in indisdinguishable_pairs_copy:
@@ -312,85 +316,11 @@ class FSA:
                 elif pair[1] == state2:
                     indisdinguishable_pairs.add((pair[0], merged_state))
                     indisdinguishable_pairs.remove(pair)
-            
 
-        # tmp          
+            new_indisdinguishable_pairs_copy = indisdinguishable_pairs.copy()
+            for pair in new_indisdinguishable_pairs_copy:
+                if pair[0] == pair[1]:
+                    indisdinguishable_pairs.remove(pair)
+        '''delete disconnected states'''
+        # tmp
         self.to_dot("minimized.dot")
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-        '''
-        # recombine the pairs into sets, each set represents a combined state 
-
-        # turn set into a dict
-        indisdinguishable_pairs_dict = dict()
-        for indisdinguishable_pair in indisdinguishable_pairs:
-            state1, state2 = indisdinguishable_pair
-            indisdinguishable_pairs_dict[state1] = state2
-        
-        for indisdinguishable_pair in indisdinguishable_pairs:'''
-            
-
-
-
-        
-
-        '''
-        # state number of the first merged state
-        merged_state = num_states 
-        
-        
-        # merge
-        for indistinguishable_pair in indisdinguishable_pairs:
-            # unpack indistinguishable pair
-            state1, state2 = indistinguishable_pair
-
-            merged_state = 
-
-            # in the case of a trie, there will only be at most one transition goes to/from a state
-
-            # transition goes to s1
-            # transition goes from s1
-        
-            # transition goes to s2
-            # transition goes from s2'''
-
-
-
-
-'''
-def main():
-    m = FSA()
-    m.add_arc(0, 'w', 1)
-    m.add_arc(0, 'u', 0)
-    a = m.add_arc(1, 'a')
-    l = m.add_arc(a, 'l')
-    k = m.add_arc(l, 'k')
-    m.mark_accept(k)
-
-    m.write_att()
-    m.generate(maximum_sentences=3)
-
-
-if __name__ == "__main__":
-    main()
-'''
