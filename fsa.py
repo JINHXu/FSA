@@ -245,13 +245,6 @@ class FSA:
         # len(self._states) is one smaller, because start state is not in the set of states(on purpose)
         num_states = len(self._states) + 1
 
-        # initialization: acc states are firstly partinioned
-        for state1 in range(num_states-1):
-            for state2 in range(state1+1, num_states):
-                if state1 < state2:
-                    if (state2 in self.accepting) != (state1 in self.accepting):
-                        distinguishable_pairs.add((state1, state2))
-
         # loop termination marker
         just_updated = True
 
@@ -261,6 +254,8 @@ class FSA:
             # traverse the state-by-state table
             for state1 in range(num_states - 1):
                 for state2 in range(state1+1, num_states):
+                    if (state2 in self.accepting) != (state1 in self.accepting):
+                        distinguishable_pairs.add((state1, state2))
                     if (state1, state2) not in distinguishable_pairs:
                         for sym in self._alphabet:
                             # in the case we are expected to deal with, there can be at most one next move
@@ -274,9 +269,12 @@ class FSA:
                                 if (n1, n2) in distinguishable_pairs:
                                     distinguishable_pairs.add((state1, state2))
                                     just_updated = True
+                                    break
 
                             elif (next1 is None and next2 is not None) or (next2 is None and next1 is not None):
                                 distinguishable_pairs.add((state1, state2))
+                                just_updated = True
+                                break
 
         indisdinguishable_pairs = set()
         for state1 in range(num_states-1):
