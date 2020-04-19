@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
-""" Data Structures and Algorithms for CL III, Assignment 4
-    See <https://dsacl3-2019.github.io/a4/> for detailed instructions.
-
-    Course:      Data Structures and Algorithms for CL III - WS1920
-    Assignment:  lab4, ex 01 + ex 03
-    Author:      Jinghua Xu
-    Description: an FSA class.
- 
-    Honor Code:  I pledge that this program represents my own work.
-"""
+"""An FSA class by Jinghua Xu."""
 
 import sys
 import random
